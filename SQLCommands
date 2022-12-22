@@ -1,0 +1,4 @@
+/** create user Table::
+CREATE TABLE userinfos (userid varchar(10) primary key,name varchar(30) not null,username varchar(15) not null,password varchar(15) not null,DOB date not null,bio varchar(255),country varchar(20) not null);
+INSERT INTO userinfos (userid,name,username,password,DOB,bio,country) VALUES('2020T45','Heckler Koch','heckler908','baker101','2002-11-09','nothing to say about me...','Nepal')
+**/
