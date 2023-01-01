@@ -1,24 +1,19 @@
 const bcrypt = require("bcrypt");
 const { addUser } = require("../../controllers/useRegister");
 const AppError = require("../../utils/AppError");
-const {
-  createToken,
-  createRefreshToken,
-} = require("../../controllers/jwtHandler");
 
 const hashPassword = async (req, res, next) => {
-  const { userid, name, username, password, DOB, bio, country } = req.body;
+  const { name, username, password, DOB, bio, country } = req.body;
   try {
-    if (!password) {
+    if (!password || !username || !name) {
       throw new AppError(
-        "MISSING HASH DATA",
+        "MISSING  DATA",
         "data and salt arguments required",
         500
       );
     } else {
       const hashPassword = await bcrypt.hash(password, 10);
       req.hashedPassword = {
-        userid,
         name,
         username,
         hashPassword,
@@ -26,7 +21,7 @@ const hashPassword = async (req, res, next) => {
         bio,
         country,
       };
-      next();
+      return next();
     }
   } catch (error) {
     console.log(error);
@@ -38,12 +33,10 @@ const addUserData = async (req, res, next) => {
   const data = req.hashedPassword;
   try {
     const result = await addUser({ data });
-    const access_token = await createToken(req.hashedPassword.username);
-    const refresh_token = await createRefreshToken(req.hashedPassword.username);
-    req.data = { result, access_token, refresh_token };
-    next();
+    req.data = { result };
+    return next();
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 

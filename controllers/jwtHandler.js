@@ -1,10 +1,10 @@
 const jwt = require("jsonwebtoken");
 
-const createToken = async (userid) => {
+const createToken = async (user) => {
   return new Promise((resolve, reject) => {
-    const payload = {};
-    const secretkey = "appleand90orange";
-    const options = { expiresIn: "30s", audience: userid };
+    const payload = { user };
+    const secretkey = process.env.ACCESS_TOKEN;
+    const options = { expiresIn: "30s", audience: user.userid };
     jwt.sign(payload, secretkey, options, (err, token) => {
       if (err) {
         return reject(err);
@@ -14,11 +14,12 @@ const createToken = async (userid) => {
     });
   });
 };
-const createRefreshToken = async (userid) => {
+
+const createRefreshToken = async (username) => {
   return new Promise((resolve, reject) => {
-    const payload = {};
-    const secretkey = "appleand90orange";
-    const options = { expiresIn: "1y", audience: userid };
+    const payload = { username: username };
+    const secretkey = process.env.REFRESH_TOKEN;
+    const options = { expiresIn: "30min", audience: username };
     jwt.sign(payload, secretkey, options, (err, token) => {
       if (err) {
         return reject(err);
@@ -30,15 +31,28 @@ const createRefreshToken = async (userid) => {
 };
 
 const verifyToken = async (token) => {
-  return new Promise((resolve, reject) => {
-    jwt.verify(token, "appleand90orange", (err, decoded) => {
-      if (!err) {
-        resolve(decoded);
-      } else {
-        reject(err);
-      }
-    });
-  });
+  try {
+    const payload = jwt.verify(token, process.env.ACCESS_TOKEN);
+    return { payload };
+  } catch (error) {
+    return { expired: error.message, error };
+  }
 };
 
-module.exports = { createToken, createRefreshToken, verifyToken };
+const verifyRefreshToken = async (token) => {
+  console.log("appleorange mango");
+  try {
+    const payload = await jwt.verify(token, process.env.REFRESH_TOKEN);
+    console.log(payload);
+    return { payload };
+  } catch (error) {
+    return { expired: error.message, error };
+  }
+};
+
+module.exports = {
+  createToken,
+  createRefreshToken,
+  verifyToken,
+  verifyRefreshToken,
+};

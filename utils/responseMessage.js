@@ -8,7 +8,7 @@ const success = (data) => {
 const failure = (data) => {
   return {
     status: "failure",
-    data: { data },
+    data: data,
   };
 };
 
