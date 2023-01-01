@@ -8,10 +8,7 @@ const JWTError = (error) => {
   return new AppError("JsonWebTokenError", error.message, 400);
 };
 const referenceError = (error) => {
-  return new AppError("Reference Error", error.message, 400);
-};
-const duplicateEntry = (error) => {
-  return new AppError("MYSQL_ERROR", error.name, 409); //HTTP code 409 for conflict
+  return new AppError("Reference Error", error.name, 400);
 };
 
 const tokenExpiredError = (error) => {
@@ -31,14 +28,27 @@ const sendErrorMessage = (error, req, res, next) => {
     })
   );
 };
+const MysqlError = (e) => {
+  if (e.errno === 1062) {
+    return new AppError("MySQL Error", "Duplicate Entry", 500);
+  }
+  if (e.errno === 1406) {
+    return new AppError("MySQL Error", "Data Too Long", 500);
+  }
+  if (e.errno === 1292) {
+    return new AppError("MySQL Error", "Incorrect date value", 500);
+  }
+};
 
 const errorHandler = (error, req, res, next) => {
-  console.log(error.name);
   let errorMessage = {
-    type: "",
-    message: "",
-    statusCode: 400,
+    type: "Error",
+    message: error.message,
+    statusCode: 500,
   };
+  if (error.errno && error.sql) {
+    errorMessage = MysqlError(error);
+  }
   if (error.name === "ValidationError") {
     errorMessage = validationError(error);
   }
@@ -53,10 +63,6 @@ const errorHandler = (error, req, res, next) => {
   if (error.name === "TypeError") {
     errorMessage = typeError(error);
   }
-  if (error.name === "ER_DUP_ENTRY") {
-    errorMessage = duplicateEntry(error);
-  }
-  //also handle missing value error also...
 
   if (error.name === "TokenExpiredError") {
     errorMessage = tokenExpiredError(error);
@@ -65,6 +71,7 @@ const errorHandler = (error, req, res, next) => {
   if (error instanceof AppError) {
     sendErrorMessage(error, req, res, next);
   }
+
   sendErrorMessage(errorMessage, req, res, next);
 };
 

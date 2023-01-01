@@ -4,7 +4,7 @@ const AuthMiddleware = async (req, res, next) => {
   const token = header.split(" ")[1];
   try {
     await verifyToken(token);
-    next();
+    return next();
   } catch (error) {
     return next(error);
   }

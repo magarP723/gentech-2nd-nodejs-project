@@ -1,4 +1,5 @@
 const dbConnection = require("../config/db.config");
+const { v4: uuidv4 } = require("uuid");
 
 const getAll = () => {
   return new Promise((resolve, reject) => {
@@ -13,7 +14,8 @@ const getAll = () => {
 };
 
 const addUser = async ({ data }) => {
-  const { userid, name, username, hashPassword, DOB, bio, country } = data;
+  const { name, username, hashPassword, DOB, bio, country } = data;
+  const userid = uuidv4();
   return new Promise((resolve, reject) => {
     dbConnection.query(
       `INSERT INTO userinfos (userid,name,username,password,DOB,bio,country) VALUES ("${userid}","${name}","${username}","${hashPassword}","${DOB}","${bio}","${country}")`,
@@ -42,5 +44,52 @@ const getUser = (username) => {
     );
   });
 };
+const addRefreshToken = (refreshtoken) => {
+  let uuid = uuidv4();
+  return new Promise((resolve, reject) => {
+    dbConnection.query(
+      `INSERT INTO refreshtoken (tokenid,refreshToken) VALUE ("${uuid}","${refreshtoken}")`,
+      (err, result) => {
+        if (!err) {
+          return resolve(result);
+        }
+        return reject(err);
+      }
+    );
+  });
+};
+const getRefreshToken = (refreshToken) => {
+  return new Promise((resolve, rejecct) => {
+    dbConnection.query(
+      `SELECT * FROM refreshtoken WHERE refreshToken = "${refreshToken}"`,
+      (err, result) => {
+        if (!err) {
+          return resolve(result);
+        }
+        return reject(err);
+      }
+    );
+  });
+};
 
-module.exports = { getAll, addUser, getUser };
+const deleteRefreshTOken = (refreshToken) => {
+  return new Promise((resolve, reject) => {
+    dbConnection.query(
+      `DELETE FROM refreshtoken WHERE refreshToken="${refreshToken}"`,
+      (err, result) => {
+        if (!err) {
+          return resolve(result);
+        }
+        return reject(err);
+      }
+    );
+  });
+};
+module.exports = {
+  getAll,
+  addUser,
+  getUser,
+  addRefreshToken,
+  getRefreshToken,
+  deleteRefreshTOken,
+};

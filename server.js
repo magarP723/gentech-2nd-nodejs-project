@@ -1,13 +1,17 @@
 const express = require("express");
-require("express-async-errors");
 const cors = require("cors");
-const PORT = 3002;
+var morgan = require("morgan");
+require("dotenv").config();
+const cookieParser = require("cookie-parser");
 const indexRouter = require("./routes/index.routes");
 const errorHandler = require("./middlewares/errorController");
+
 const app = express();
 app.use(cors());
-
+app.use(morgan("dev"));
+app.use(cookieParser());
 app.use(express.json());
+global.__basedir = __dirname;
 
 app.use("/api", indexRouter); //main api handler
 
@@ -20,6 +24,6 @@ app.all("*", (req, res) => {
 
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`Listening to port ${PORT}`);
+app.listen(process.env.PORT, () => {
+  console.log(`Listening to port ${process.env.PORT}`);
 });

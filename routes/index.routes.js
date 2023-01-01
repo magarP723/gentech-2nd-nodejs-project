@@ -1,9 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const userRoutes = require("./user.routes");
-const dataAPI = require("./data.routes");
+const songAPI = require("./song.routes");
 
 router.use("/users", userRoutes);
-router.use("/getdata", dataAPI);
+router.use("/songs", songAPI);
 
 module.exports = router;
